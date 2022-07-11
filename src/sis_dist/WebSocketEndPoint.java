@@ -12,9 +12,10 @@ import javax.websocket.Session;
 import javax.websocket.server.PathParam;
 import javax.websocket.server.ServerEndpoint;
 
+//https://github.com/DawidLokiec/web_socket_test_automation_framework/blob/master/src/main/java/com/example/end2end/WebSocketClientEndpoint.java
 
 @ServerEndpoint("/teste")
-public class webSocket {
+public class WebSocketEndPoint {
 	
 	
 	@Inject
@@ -26,7 +27,7 @@ public class webSocket {
 	
 	private String userId;
 
-	private static ConcurrentHashMap<String, webSocket> webSocketMap = new ConcurrentHashMap<>();
+	private static ConcurrentHashMap<String, WebSocketEndPoint> webSocketMap = new ConcurrentHashMap<>();
 	
 	
 	

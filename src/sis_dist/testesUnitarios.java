@@ -23,7 +23,7 @@ class testesUnitarios {
 	
 	@Test
 	void testRespostaPergunta() {
-		String resultado = dialogosServices.geraResposta("o que são sapos");
+		String resultado = dialogosServices.geraResposta("o que são sapos?");
 		Assert.assertNotNull(resultado);
 	}
 	

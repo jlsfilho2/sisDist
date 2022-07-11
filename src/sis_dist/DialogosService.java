@@ -53,11 +53,11 @@ public class DialogosService {
 	}
 
 	String geraResposta(String frase) {
-		List<String> respostasPossiveis = getRespostas(frase);
+		List<String> respostasPossiveis = getRespostas(frase, true);
 		if (respostasPossiveis.size() > 0) {
 			int index = new Random().nextInt(respostasPossiveis.size());
 			return respostasPossiveis.get(index);
-		} else if (!naoEhPergunta(frase)) {
+		} else if (!ehPergunta(frase)) {
 			mapeia(frase);
 			int index = new Random().nextInt(naoSei.size());
 			return naoSei.get(index);
@@ -68,42 +68,55 @@ public class DialogosService {
 
 	}
 
-	private List<String> getRespostas(String frase) {
-		Optional<String> objeto = obtemObjeto(frase);
-		return objeto.isPresent() && mapa.containsKey(objeto.get())? mapa.get(objeto.get()) : new ArrayList<String>();
+	private List<String> getRespostas(String frase, boolean trata) {
+		Optional<String> objeto = obtemObjeto(frase, trata);
+
+		return objeto.isPresent() && mapa.containsKey(trataPlural(objeto.get())) ? mapa.get(trataPlural(objeto.get()))
+				: new ArrayList<String>();
 	}
 
 	void mapeia(String questao) {
 		if (questao.contains("é")) {
 			String[] split = questao.split("é");
-			trataRespostas(split[0].substring(split[0].lastIndexOf(" ")).toLowerCase().trim(), split[1].trim());
+			String key = split[0].trim().substring(0,split[0].lastIndexOf(" ")).toLowerCase();
+			trataRespostas(trataPlural(key), split[1].trim());
 		} else if (questao.toLowerCase().startsWith("sabia que")) {
 			String obj = new String(questao.substring(questao.indexOf("sabia que".length()), questao.length()));
-			trataRespostas(obj.substring(obj.indexOf(" ")).toLowerCase().trim(),
+			String key = obj.substring(obj.indexOf(" ")).toLowerCase().trim();
+			trataRespostas(trataPlural(key),
 					obj.substring(obj.indexOf(" "), obj.length()).trim());
 		}
 
 	}
 
 	private void trataRespostas(String key, String resposta) {
-		if (mapa.containsKey(key)) {
+		Optional<String> objeto = obtemObjeto(key, true);
+		if (mapa.containsKey(trataPlural(key))) {
 			List<String> respostas = mapa.get(key);
 			respostas.add(resposta);
-			mapa.replace(key, respostas);
+			mapa.replace(trataPlural(key), respostas);
 		} else {
-			mapa.put(key, List.of(resposta));
+			mapa.put(trataPlural(key), List.of(resposta));
 		}
 	}
 
-	private boolean naoEhPergunta(String frase) {
+	private boolean ehPergunta(String frase) {
 		return frase.endsWith("?") || frase.toLowerCase().startsWith("por que");
 	}
 
-	private Optional<String> obtemObjeto(String frase) {
-		frase = frase.toLowerCase();
-		List<String> tokens = List.of(frase.split(" "));
-		Optional<String> res = tokens.stream().filter(s -> !TOKENS.contains(s) && !s.isBlank() && !s.isEmpty()).findFirst();
+	private Optional<String> obtemObjeto(String frase, boolean replace) {
+		String fraseTratada = replace
+				? new String(frase.toLowerCase().replaceAll("[^a-záàâãéèêíïóôõöúçñÁÀÂÃÉÈÍÏÓÔÕÖÚÇÑ ]+", ""))
+				: frase;
+		List<String> tokens = List.of(fraseTratada.split(" "));
+		Optional<String> res = tokens.stream().filter(s -> !TOKENS.contains(s) && !s.isBlank() && !s.isEmpty())
+				.findFirst();
 		return res;
+	}
+
+	private String trataPlural(String objeto) {
+		String stringReturn = objeto.endsWith("s") ? objeto.substring(0, objeto.length() - 1) : objeto;
+		return stringReturn;
 	}
 
 }
